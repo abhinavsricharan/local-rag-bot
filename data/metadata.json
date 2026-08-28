@@ -1,0 +1,12 @@
+{
+  "nic_cybersecurity_guidelines.pdf": {
+    "title": "NIC Cybersecurity Guidelines for UPSC Portals",
+    "date": "2023-10-15",
+    "keywords": ["cybersecurity", "NIC", "UPSC", "portal", "audit", "encryption"]
+  },
+  "upsc_egov_architecture.pdf": {
+    "title": "e-Governance Architecture for UPSC IT Wing",
+    "date": "2024-01-10",
+    "keywords": ["e-governance", "architecture", "infrastructure", "IT wing", "cloud"]
+  }
+}
