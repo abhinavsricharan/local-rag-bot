@@ -2,6 +2,27 @@
 
 The local vector store relies on an SQLite database (`chroma.sqlite3`) to manage metadata, text chunks, and document associations. Below is a breakdown of the critical tables and their roles in the RAG pipeline.
 
+## Database Relationship Diagram
+
+```mermaid
+graph TD
+    T[tenants] -->|Contains| D[databases]
+    D -->|Contains| C[collections]
+    
+    C -->|Has Settings| CM[collection_metadata]
+    C -->|Divided into| S[segments]
+    
+    S -->|Has Settings| SM[segment_metadata]
+    S -->|Contains| E[embeddings]
+    
+    E -->|Linked to Text/Metadata| EM[embedding_metadata]
+    E -->|Linked to Array Metadata| EMA[embedding_metadata_array]
+    
+    EQ[embeddings_queue] -.->|Processed & Indexed into| E
+    
+    FTS[embedding_fulltext_search] -.->|Indexes text inside| EM
+```
+
 ## Core Tables
 
 ### 1. `collections` & `collection_metadata`
