@@ -11,15 +11,18 @@ The following diagram illustrates how documents are processed and how the chatbo
 
 ```mermaid
 graph TD
-    A[Client PDFs] -->|Place in| B([data/](data/) folder)
-    C[[metadata.json](data/metadata.json)] -->|Attach Keywords/Titles| B
-    B -->|[ingest.py](ingest.py)| D[PyPDF Loader & Splitter]
+    A[Client PDFs] -->|Place in| B(data/ folder)
+    C[metadata.json] -->|Attach Keywords/Titles| B
+    B -->|ingest.py| D[PyPDF Loader & Splitter]
     D -->|nomic-embed-text| E[(Chroma Vector Database)]
     
-    F[User Question] -->|[query.py](query.py)| G{Search Database}
+    F[User Question] -->|query.py| G{Search Database}
     E --> G
     G -->|Retrieve Relevant Paragraphs| H[Phi-3 Local LLM]
     H -->|Generate Response| I[Answer sent to User]
+
+    click B "data/" "View data folder"
+    click C "data/metadata.json" "View metadata"
 ```
 
 ## End-to-End Pipeline Lifecycle
