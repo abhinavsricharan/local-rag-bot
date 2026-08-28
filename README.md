@@ -56,3 +56,8 @@ This entire process is automated using Python scripts:
 3. Put your PDFs in the `data/` folder and update `data/metadata.json` with their details.
 4. Run the ingestion script: `python ingest.py`.
 5. Start chatting: `python query.py`.
+
+## Disclaimer
+The PDF files provided in the `data/` folder are mock templates included solely for demonstration and testing purposes. They do not represent official policies, guidelines, or infrastructure of the UPSC, NIC, or any government entity. 
+
+This software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and non-infringement. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability arising from, out of, or in connection with the software or the use or other dealings in the software.
