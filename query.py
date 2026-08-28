@@ -9,7 +9,7 @@ from langchain.prompts import PromptTemplate
 def interactive_chat():
     print("Loading vector store...")
     embeddings = OllamaEmbeddings(model="nomic-embed-text")
-    vectorstore = Chroma(persist_directory="./chroma_db", embedding_function=embeddings)
+    vectorstore = Chroma(persist_directory="data/chroma_db", embedding_function=embeddings)
     
     print("Initializing LLM and conversation memory...")
     llm = Ollama(model="phi3")

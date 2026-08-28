@@ -31,7 +31,7 @@ def ingest_documents():
 
     print("Generating embeddings and storing in Chroma...")
     embeddings = OllamaEmbeddings(model="nomic-embed-text")
-    vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings, persist_directory="./chroma_db")
+    vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings, persist_directory="data/chroma_db")
     
     print("Ingestion complete.")
 
