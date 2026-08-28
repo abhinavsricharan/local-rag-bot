@@ -5,11 +5,28 @@ This project is a localized AI assistant designed to answer questions about the 
 
 Because the system runs completely offline, no sensitive government data is ever sent to the internet.
 
+## Architecture and Data Flow
+
+The following diagram illustrates how documents are processed and how the chatbot answers questions:
+
+```mermaid
+graph TD
+    A[Client PDFs] -->|Place in| B(data/ folder)
+    C[metadata.json] -->|Attach Keywords/Titles| B
+    B -->|ingest.py| D[PyPDF Loader & Splitter]
+    D -->|nomic-embed-text| E[(Chroma Vector Database)]
+    
+    F[User Question] -->|query.py| G{Search Database}
+    E --> G
+    G -->|Retrieve Relevant Paragraphs| H[Phi-3 Local LLM]
+    H -->|Generate Response| I[Answer sent to User]
+```
+
 ## End-to-End Pipeline Lifecycle
 The lifecycle of this system operates in three main stages:
 
 1. **Document Preparation**: We gather PDF documents and a structured list of information (metadata) describing what those documents are about.
-2. **Ingestion (Reading and Memorizing)**: The system reads the PDFs, breaks them into small paragraphs, and translates them into a mathematical format (called embeddings). These are saved in a local vector database.
+2. **Ingestion (Reading and Memorizing)**: The system reads the PDFs, breaks them into small paragraphs, and translates them into a mathematical format (called embeddings). These are saved in the local vector database.
 3. **Querying (Asking Questions)**: When you type a question, the system searches the database for the most relevant paragraphs. It then hands those paragraphs to the AI, which reads them and types back a helpful answer.
 
 ## Answering Core Concepts
@@ -22,10 +39,9 @@ RAG stands for Retrieval-Augmented Generation.
 Instead of relying on the AI's general internet knowledge, we "Retrieve" the specific PDFs and metadata we saved. We "Augment" or provide that specific text to our local AI model (Phi-3). The AI then "Generates" a simple English response based strictly on the provided documents. 
 
 ### 3. How This is Achieved
-This entire process is automated using a few Python scripts:
-- **`generate_pdfs.py`**: A helper script to create sample PDF documents if you do not have your own.
-- **`ingest.py`**: The script that loads the PDFs, reads the `metadata.json`, and builds the local database (`chroma_db`).
-- **`query.py`**: The chat interface. Running this script starts a conversation where you can ask questions, and the system handles searching the database and generating the final answer.
+This entire process is automated using Python scripts:
+- **`ingest.py`**: The script that loads your PDFs, reads the `metadata.json`, and builds the local database (`chroma_db`).
+- **`query.py`**: The chat interface. Running this script starts a continuous conversation where you can ask questions, and the system handles searching the database and generating the final answer.
 
 ## Setup Instructions
 
@@ -37,6 +53,6 @@ This entire process is automated using a few Python scripts:
 ### Running the System
 1. Open your terminal or command prompt.
 2. Ensure you have the required packages installed: `pip install langchain langchain-community chromadb pypdf`.
-3. Put your PDFs in the `data/` folder and update `data/metadata.json` (or run `python generate_pdfs.py` to create samples).
+3. Put your PDFs in the `data/` folder and update `data/metadata.json` with their details.
 4. Run the ingestion script: `python ingest.py`.
 5. Start chatting: `python query.py`.
