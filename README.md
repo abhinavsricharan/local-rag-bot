@@ -62,6 +62,27 @@ This entire process is automated using Python scripts:
 4. Run the ingestion script: `python ingest.py`.
 5. Start chatting: `python query.py`.
 
+## Example Usage
+
+Here are some snapshot examples of the chatbot in action:
+
+**Example 1: Cybersecurity Policy**
+```text
+User: What are the cybersecurity guidelines for UPSC portals?
+Assistant: The cybersecurity guidelines for UPSC portals, as outlined by NIC, include the following key points:
+1. All UPSC web portals must implement TLS 1.3 for encryption.
+2. Multi-factor authentication (MFA) is required for all administrative access.
+3. Passwords must be a minimum of 14 characters long and changed every 90 days.
+4. Annual security audits are necessary for all UPSC IT infrastructure.
+5. Security breaches must be reported to the NIC CERT within 24 hours.
+```
+
+**Example 2: Infrastructure Architecture**
+```text
+User: What cloud infrastructure is used to host the UPSC portals?
+Assistant: The UPSC portals and applications are hosted on the NIC National Cloud (MeghRaj). The architecture includes auto-scaling groups configured to handle peak loads during exam result declarations.
+```
+
 ## Disclaimer
 The PDF files provided in the [`data/`](data/) folder are mock templates included solely for demonstration and testing purposes. They do not represent official policies, guidelines, or infrastructure of the UPSC, NIC, or any government entity. 
 
