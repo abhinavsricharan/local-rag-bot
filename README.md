@@ -5,7 +5,7 @@ This project is a localized AI assistant designed to answer questions about the 
 
 Because the system runs completely offline, no sensitive government data is ever sent to the internet.
 
-**GitHub Repository:** [https://github.com/abhinavsricharan/local-rag-bot-](https://github.com/abhinavsricharan/local-rag-bot-)
+**GitHub Repository:** [https://github.com/abhinavsricharan/local-rag-bot](https://github.com/abhinavsricharan/local-rag-bot)
 
 ## Architecture and Data Flow
 
