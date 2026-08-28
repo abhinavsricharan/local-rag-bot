@@ -11,12 +11,12 @@ The following diagram illustrates how documents are processed and how the chatbo
 
 ```mermaid
 graph TD
-    A[Client PDFs] -->|Place in| B(data/ folder)
-    C[metadata.json] -->|Attach Keywords/Titles| B
-    B -->|ingest.py| D[PyPDF Loader & Splitter]
+    A[Client PDFs] -->|Place in| B([data/](data/) folder)
+    C[[metadata.json](data/metadata.json)] -->|Attach Keywords/Titles| B
+    B -->|[ingest.py](ingest.py)| D[PyPDF Loader & Splitter]
     D -->|nomic-embed-text| E[(Chroma Vector Database)]
     
-    F[User Question] -->|query.py| G{Search Database}
+    F[User Question] -->|[query.py](query.py)| G{Search Database}
     E --> G
     G -->|Retrieve Relevant Paragraphs| H[Phi-3 Local LLM]
     H -->|Generate Response| I[Answer sent to User]
@@ -26,13 +26,13 @@ graph TD
 The lifecycle of this system operates in three main stages:
 
 1. **Document Preparation**: We gather PDF documents and a structured list of information (metadata) describing what those documents are about.
-2. **Ingestion (Reading and Memorizing)**: The system reads the PDFs, breaks them into small paragraphs, and translates them into a mathematical format (called embeddings). These are saved in the local vector database.
+2. **Ingestion (Reading and Memorizing)**: The system reads the PDFs, breaks them into small paragraphs, and translates them into a mathematical format (called embeddings). These are saved in the local vector database (see [Data Overview](data/README.md) and [Chroma DB Schema](data/CHROMA_DB_SCHEMA.md)).
 3. **Querying (Asking Questions)**: When you type a question, the system searches the database for the most relevant paragraphs. It then hands those paragraphs to the AI, which reads them and types back a helpful answer.
 
 ## Answering Core Concepts
 
 ### 1. Structured Database with PDF Library Available
-We organize our documents using a simple structured database file called `metadata.json`. This file acts like a library catalog. It stores the title, date, and important keywords for every PDF document in our `data/` folder. When the system reads the PDFs, it attaches this structured catalog information to the text, ensuring the AI knows the exact context of the files it is reading.
+We organize our documents using a simple structured database file called [`metadata.json`](data/metadata.json). This file acts like a library catalog. It stores the title, date, and important keywords for every PDF document in our [`data/`](data/) folder. When the system reads the PDFs, it attaches this structured catalog information to the text, ensuring the AI knows the exact context of the files it is reading.
 
 ### 2. Using Metadata and PDFs with a Local Model (RAG)
 RAG stands for Retrieval-Augmented Generation. 
@@ -40,8 +40,8 @@ Instead of relying on the AI's general internet knowledge, we "Retrieve" the spe
 
 ### 3. How This is Achieved
 This entire process is automated using Python scripts:
-- **`ingest.py`**: The script that loads your PDFs, reads the `metadata.json`, and builds the local database (`chroma_db`).
-- **`query.py`**: The chat interface. Running this script starts a continuous conversation where you can ask questions, and the system handles searching the database and generating the final answer.
+- **[`ingest.py`](ingest.py)**: The script that loads your PDFs, reads the [`metadata.json`](data/metadata.json), and builds the local database (`chroma_db` — detailed in [Chroma DB Schema](data/CHROMA_DB_SCHEMA.md)).
+- **[`query.py`](query.py)**: The chat interface. Running this script starts a continuous conversation where you can ask questions, and the system handles searching the database and generating the final answer.
 
 ## Setup Instructions
 
@@ -53,11 +53,11 @@ This entire process is automated using Python scripts:
 ### Running the System
 1. Open your terminal or command prompt.
 2. Ensure you have the required packages installed: `pip install langchain langchain-community chromadb pypdf`.
-3. Put your PDFs in the `data/` folder and update `data/metadata.json` with their details.
+3. Put your PDFs in the [`data/`](data/) folder and update [`data/metadata.json`](data/metadata.json) with their details.
 4. Run the ingestion script: `python ingest.py`.
 5. Start chatting: `python query.py`.
 
 ## Disclaimer
-The PDF files provided in the `data/` folder are mock templates included solely for demonstration and testing purposes. They do not represent official policies, guidelines, or infrastructure of the UPSC, NIC, or any government entity. 
+The PDF files provided in the [`data/`](data/) folder are mock templates included solely for demonstration and testing purposes. They do not represent official policies, guidelines, or infrastructure of the UPSC, NIC, or any government entity. 
 
 This software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and non-infringement. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability arising from, out of, or in connection with the software or the use or other dealings in the software.
