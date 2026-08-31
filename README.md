@@ -28,7 +28,7 @@ graph TD
 ```
 
 ## End-to-End Pipeline Lifecycle
-The lifecycle of this system operates in three main stages (for a deep dive into edge cases, chunking overlap strategies, and embedding math, see [Evaluation and Strategy](EVALUATION_AND_STRATEGY.md)):
+The lifecycle of this system operates in three main stages (for a deep dive into edge cases, chunking overlap strategies, and embedding math, see [Evaluation and Strategy](Eval.md)):
 
 1. **Document Preparation**: We gather PDF documents and a structured list of information (metadata) describing what those documents are about.
 2. **Ingestion (Reading and Memorizing)**: The system reads the PDFs, breaks them into small paragraphs, and translates them into a mathematical format (called embeddings). These are saved in the local vector database (see [Data Overview](data/README.md) and [Chroma DB Schema](data/CHROMA_DB_SCHEMA.md)).
