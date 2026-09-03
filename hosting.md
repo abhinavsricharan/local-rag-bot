@@ -61,7 +61,83 @@ With 20 or more users actively using the dashboard, overlap is guaranteed, and r
 
 ---
 
-## 3. Step-by-Step On-Premises Setup
+## 3. Technical Justification for RAM and GPU Requirements
+
+A common question when planning infrastructure is: "If the quantized model is only 2.2 GB, why do we need 32 GB of system RAM or a 12 GB to 24 GB GPU?"
+
+The answer lies in the mathematical combination of static weights, the dynamic Key-Value (KV) cache created for every concurrent user, operating system overhead, and memory bus bandwidth physics.
+
+### 3.1. Static Base Footprint (Model Weights)
+Before any user types a query, the system must keep both local models resident in memory:
+- Phi-3 Mini (3.82 billion parameters, Q4_0 quantized): 2.2 GB
+- nomic-embed-text (137 million parameters, FP16): 0.3 GB
+- Total static model weight memory: 2.5 GB
+
+### 3.2. The Dynamic Variable: Key-Value (KV) Cache per User Slot
+When an LLM generates text, it retains the mathematical representation of all previous tokens in a scratchpad called the Key-Value (KV) cache. Without this cache, the model would need to reprocess the entire document context for every single new word generated.
+
+The memory required by the KV cache follows an exact mathematical formula:
+KV Cache Memory = 2 * Layers * Attention Heads * Head Dimension * Context Length * Bytes per Element
+
+For Phi-3 Mini:
+- Number of layers: 32
+- Attention heads: 32
+- Head dimension: 96
+- Data precision: 2 bytes (FP16)
+- Memory per token: 2 * 32 * 32 * 96 * 2 bytes = 393,216 bytes (approximately 0.384 MB per token)
+
+In our RAG pipeline, each request includes the system prompt, retrieved document chunks, user question, and generated answer, averaging roughly 4,096 tokens in the active context window:
+- KV Cache per user slot (at 4,096 tokens): 4,096 * 0.384 MB = 1.57 GB of dedicated memory per slot.
+
+When multiple users query simultaneously, Ollama provisions parallel context slots:
+- 1 concurrent user slot: 1.57 GB
+- 4 concurrent user slots (OLLAMA_NUM_PARALLEL=4): 4 * 1.57 GB = 6.28 GB
+- 8 concurrent user slots (OLLAMA_NUM_PARALLEL=8): 8 * 1.57 GB = 12.56 GB
+- 12 concurrent user slots (OLLAMA_NUM_PARALLEL=12): 12 * 1.57 GB = 18.84 GB
+
+### 3.3. Application, Operating System, and Runtime Overhead
+Beyond the models and the KV cache, other components require dedicated RAM:
+- Host Operating System (Windows Server or Linux kernel, background daemons, security agents): 2.5 GB to 3.5 GB.
+- Python runtime, Streamlit multi-user session state buffers, LangChain memory, and in-memory ChromaDB vector search structures: 1.5 GB to 2.5 GB.
+- CUDA context and PyTorch driver workspace (on GPU systems): 1.0 GB.
+- Total system and application overhead: roughly 5.0 GB to 6.0 GB.
+
+### 3.4. Why 32 GB System RAM is Required for CPU Hosting (2 to 5 Users)
+Summing up the requirements for a 4-slot CPU host:
+- Operating System and background tasks: 3.0 GB
+- Streamlit application and ChromaDB: 2.0 GB
+- Model static weights (Phi-3 Mini + embeddings): 2.5 GB
+- 4 parallel KV cache slots: 6.3 GB
+- Total minimum active working set: 13.8 GB
+
+If this system were hosted on a 16 GB machine:
+1. The working set (13.8 GB) leaves less than 2 GB of free buffer. Any sudden spike in document chunk size or background processes pushes memory usage to 100%, causing the OS to swap memory pages to the hard drive. Swapping reduces token generation speed to less than 1 token per second.
+2. Memory Bus Channeling: Standard 32 GB configurations use two 16 GB sticks in dual-channel mode (or four 8 GB sticks in quad-channel mode). This doubles the physical memory bus width, providing 50 to 80 GB/s bandwidth instead of 25 GB/s. Because CPU inference is strictly memory-bandwidth bound, dual-channel 32 GB RAM literally doubles token generation speed compared to a single 16 GB stick.
+
+### 3.5. Why 12 GB VRAM is Required for GPU Hosting (2 to 5 Users)
+Summing up the VRAM requirements for a 4-slot GPU host:
+- CUDA context and driver runtime: 1.0 GB
+- Phi-3 Mini static weights: 2.2 GB
+- nomic-embed-text static weights: 0.3 GB
+- 4 parallel KV cache slots: 6.3 GB
+- Total required dedicated VRAM: 9.8 GB
+
+Why an 8 GB GPU is insufficient:
+- Consumer GPUs with 8 GB VRAM (such as an RTX 3050, RTX 3070 8GB, or RTX 4060 8GB) do not have enough room for 9.8 GB. When VRAM fills up, CUDA drivers either crash with an Out-Of-Memory (OOM) error or fall back to system RAM over the slow PCIe bus, degrading generation speed by over 80%.
+- A 12 GB GPU (such as an RTX 3060 12GB or RTX 4060 Ti 16GB) provides 9.8 GB of working room plus a 2.2 GB safety margin to absorb longer context queries without spilling over.
+
+### 3.6. Why 24 GB VRAM and 64 to 128 GB RAM are Required for 20+ Users
+At departmental scale with 8 to 12 active parallel streams:
+- Static model weights: 2.5 GB
+- CUDA runtime: 1.2 GB
+- 8 to 12 KV cache slots: 12.6 GB to 18.8 GB
+- Total required VRAM: 16.3 GB to 22.5 GB
+
+A 24 GB enterprise GPU (such as the NVIDIA A10, L4, or RTX 3090/4090) is the exact mathematical threshold needed to house 8 to 12 completely parallel streams without dropping requests or queueing users. On CPU servers, supporting 20+ active users across multi-socket NUMA nodes requires 64 GB to 128 GB registered ECC RAM across all memory channels to avoid CPU core starvation.
+
+---
+
+## 4. Step-by-Step On-Premises Setup
 
 ### Step 1: Configure Ollama for Network Access and Concurrency
 
@@ -99,8 +175,9 @@ After setting these variables, restart the Ollama service.
 To make the user interface reachable by team members on the local network, bind Streamlit to all network interfaces:
 
 ```bash
-streamlit run app.py --server.address 0.0.0.0 --server.port 8501
+streamlit run streamlit.py --server.address 0.0.0.0 --server.port 8501
 ```
+(Alternatively, `streamlit run app.py` can be used interchangeably).
 
 Colleagues on the same local network or connected via corporate VPN can now access the bot in their browser at:
 ```text
@@ -147,7 +224,7 @@ server {
 
 ---
 
-## 4. Operational Maintenance and Best Practices
+## 5. Operational Maintenance and Best Practices
 
 1. Shared Vector Store Integrity:
    Ensure the data/chroma_db folder is pre-indexed before launching the multi-user service. During multi-user querying, the database operates in read-only mode, preventing file locking conflicts across sessions.
@@ -156,4 +233,4 @@ server {
    When adding new policies or PDFs to the data directory, schedule index updates during low-usage maintenance windows.
 
 3. Monitoring Memory:
-   Keep an eye on system RAM and VRAM usage. The baseline memory requirement is roughly 4 GB for the operating system and Streamlit, 2.5 GB for Phi-3 Mini, and 0.5 GB for nomic-embed-text, totaling approximately 7 GB of baseline working memory.
+   Keep an eye on system RAM and VRAM usage. The baseline memory requirement is roughly 4 GB for the operating system and Streamlit, 2.5 GB for Phi-3 Mini, and 0.5 GB for nomic-embed-text, totaling approximately 7 GB of baseline working memory before parallel KV cache allocation.
