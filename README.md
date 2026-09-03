@@ -45,7 +45,7 @@ Instead of relying on the AI's general internet knowledge, we "Retrieve" the spe
 
 ### 3. How This is Achieved
 This entire process is automated using Python scripts:
-- **[`ingest.py`](ingest.py)**: The script that loads your PDFs, reads the [`metadata.json`](data/metadata.json), and builds the local database (`chroma_db` — detailed in [Chroma DB Schema](data/CHROMA_DB_SCHEMA.md)).
+- **[`ingest.py`](ingest.py)**: The script that loads your PDFs, reads the [`metadata.json`](data/metadata.json), and builds the local database (`chroma_db` - detailed in [Chroma DB Schema](data/CHROMA_DB_SCHEMA.md)).
 - **[`query.py`](query.py)**: The chat interface. Running this script starts a continuous conversation where you can ask questions, and the system handles searching the database and generating the final answer.
 
 ## Setup Instructions
@@ -57,10 +57,13 @@ This entire process is automated using Python scripts:
 
 ### Running the System
 1. Open your terminal or command prompt.
-2. Ensure you have the required packages installed: `pip install langchain langchain-community chromadb pypdf`.
+2. Ensure you have the required packages installed: `pip install -r requirements.txt`.
 3. Put your PDFs in the [`data/`](data/) folder and update [`data/metadata.json`](data/metadata.json) with their details.
 4. Run the ingestion script: `python ingest.py`.
-5. Start chatting: `python query.py`.
+5. Start chatting via terminal (`python query.py`) or launch the web dashboard (`streamlit run app.py`).
+
+## On-Premises Hosting and Multi-User Deployment
+For detailed specifications on deploying this system on private on-premises infrastructure, sizing CPU-only versus GPU hardware, and configuring multi-user concurrency, see the [On-Premises Hosting Guide](hosting.md).
 
 ## Example Usage
 

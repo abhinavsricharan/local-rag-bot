@@ -3,3 +3,5 @@ __pycache__/
 *$py.class
 data/*.pdf
 *.bin
+*.mp4
+data/chroma_db/
