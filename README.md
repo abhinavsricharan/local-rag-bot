@@ -65,9 +65,28 @@ This entire process is automated using Python scripts:
 ## On-Premises Hosting and Multi-User Deployment
 For detailed specifications on deploying this system on private on-premises infrastructure, sizing CPU-only versus GPU hardware, and configuring multi-user concurrency, see the [On-Premises Hosting Guide](hosting.md).
 
+## Web Dashboard Preview and Snapshot Walkthrough
+
+Below are visual captures from the prototype recording (`bot-streamlit-prototype.mp4`) demonstrating the Azure AI Foundry-style dashboard, query grounding, and cosine similarity metric inspection.
+
+### 1. Conversational Query Grounding
+The bot synthesizes direct, grounded answers based strictly on the retrieved document context:
+
+![Query and Grounded Response](docs/images/rag_query_answer.png)
+
+### 2. Retrieval Thought Process and Query Vectorization
+Expanding the inspection drawer displays the query vectorization breakdown:
+
+![Query Vectorization and Thought Process](docs/images/retrieval_thought_process.png)
+
+### 3. Cosine Similarity Ranking and Source Attribution
+Each candidate chunk is displayed with its exact calculated cosine distance, normalized similarity percentage, and document attribution:
+
+![Cosine Similarity and Chunk Ranking](docs/images/cosine_similarity_metrics.png)
+
 ## Example Usage
 
-Here are some snapshot examples of the chatbot in action:
+Here are some text snapshot examples of the chatbot in action:
 
 **Example 1: Cybersecurity Policy**
 ```text
